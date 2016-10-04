@@ -1,6 +1,8 @@
 'use strict';
 
 const ESIRequest = require('./src/ESIRequest.js');
+const FileHandler = require('./src/FileHandler/S3Handler.js');
+const AWS = require('aws-sdk');
 
 module.exports.esi = (event, context, cb) => {
 
@@ -14,7 +16,7 @@ module.exports.esi = (event, context, cb) => {
         cb(new Error('[404] Not found'));
     }
 
-    const AWS = require('aws-sdk');
+    // init aws settings
     const s3 = new AWS.S3();
     const params = {
         Bucket: 'test-dev-buckets-must-be-globally-unique',
@@ -22,7 +24,8 @@ module.exports.esi = (event, context, cb) => {
     };
 
     // send esi request
-    const esiRequest = new ESIRequest(s3, params);
+    const fileHandler = new FileHandler(s3, params);
+    const esiRequest = new ESIRequest(fileHandler);
     const promise = esiRequest.sendRequest('', [path]);
     promise.then(html => {
         cb(null, html);
@@ -31,13 +34,4 @@ module.exports.esi = (event, context, cb) => {
         cb(null, "broked");
     });
 
-    // plug into path
-
-    // test with multiple esis
-
-    // parse all esi stuff
-
-    // look at https://github.com/silvermine/serverless-plugin-multiple-responses/blob/master/src/index.js for how to change 40x into html
-
-    // move s3.getobject into another object
 };

@@ -1,19 +1,20 @@
 'use strict';
 
-module.exports = class ESIRequest {
-    constructor(s3, defaultParams) {
-        this.s3 = s3;
-        this.defaultParams = defaultParams;
+module.exports = class {
+    constructor(fileHandler) {
+        this.fileHandler = fileHandler;
     }
 
     sendRequest(body, paths) {
+        // sets up promises for all paths to retrieve
         const promises = [];
         for (let path of paths) {
             promises[promises.length] = new Promise((resolve, reject) => {
-                this.getESI(path, resolve, reject);
+                this.fileHandler.get(path, resolve, reject);
             });
         }
 
+        // when all promises have been resolved, parse the results into the body
         return new Promise((resolve, reject) => {
             Promise.all(promises).then(values => {
                 this.parseESI(values, resolve, reject, body);
@@ -21,23 +22,6 @@ module.exports = class ESIRequest {
                 reject(reasons);
             });
         });
-    }
-
-    getESI(path, resolve, reject) {
-        const params = Object.assign(this.defaultParams, {Key: path});
-
-        // an s3 getObject request for each path
-        this.s3.getObject(
-            params, (err, data) => {
-                if (err) {
-                    reject(err.stack);
-                }
-                resolve({
-                    path: path,
-                    body: data.Body.toString('utf-8')
-                });
-            }
-        );
     }
 
     parseESI(values, resolve, reject, body) {
@@ -56,12 +40,13 @@ module.exports = class ESIRequest {
         if (!matches) {
             resolve(body);
         }
-
-        console.log(matches);
         body = body.replace(matches[0], '<%--' + matches[1] + '--%>');
         const urls = [];
         urls[urls.length] = matches[1];
 
+        // parse other ESI commands
+
+        // send a request for the new esi urls
         const subPromise = this.sendRequest(body, urls);
         subPromise.then(bodyHtml => {
             resolve(bodyHtml);

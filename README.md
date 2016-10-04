@@ -1,7 +1,6 @@
-- work out number of pages to read and send to sqs with time delay
+- parse all esi stuff
 
-- use sns to trigger from sqs after delay
+- look at https://github.com/silvermine/serverless-plugin-multiple-responses/blob/master/src/index.js for how to change 40x into html
+- need to overwrite the api-gateway stuff to alter how it determines 404s and 500s as response is already html
 
-- read each page, translate, sns (do we need this sns level?)
-
-- read each piece of data and send to db?
+- add flag to only serve up certain urls
