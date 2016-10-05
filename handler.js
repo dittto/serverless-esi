@@ -1,8 +1,10 @@
 'use strict';
 
+const AWS = require('aws-sdk');
 const ESIRequest = require('./src/ESIRequest.js');
 const FileHandler = require('./src/FileHandler/S3Handler.js');
-const AWS = require('aws-sdk');
+const ESIParser = require('./src/Parser/ESIParser.js');
+const ParsedBody = require('./src/Parser/ParsedBody.js');
 
 module.exports.esi = (event, context, cb) => {
 
@@ -19,19 +21,19 @@ module.exports.esi = (event, context, cb) => {
     // init aws settings
     const s3 = new AWS.S3();
     const params = {
-        Bucket: 'test-dev-buckets-must-be-globally-unique',
-        Key: 'path-to-retrieve-from-s3'
+        Bucket: 'test-esi-bucket',
+        Key: '-'
     };
 
     // send esi request
     const fileHandler = new FileHandler(s3, params);
-    const esiRequest = new ESIRequest(fileHandler);
-    const promise = esiRequest.sendRequest('', [path]);
+    const esiRequest = new ESIRequest(fileHandler, new ESIParser());
+    const promise = esiRequest.sendRequest(new ParsedBody('', path));
     promise.then(html => {
         cb(null, html);
     }, reason => {
         console.log(reason);
-        cb(null, "broked");
+        cb(null, "404");
     });
 
 };

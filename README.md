@@ -4,3 +4,7 @@
 - need to overwrite the api-gateway stuff to alter how it determines 404s and 500s as response is already html
 
 - add flag to only serve up certain urls
+
+- pass cache-control through from esis
+
+- add optional memcache layer, tied into cache-control

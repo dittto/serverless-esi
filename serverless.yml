@@ -1,17 +1,4 @@
-# Welcome to Serverless!
-#
-# This file is the main config file for your service.
-# It's very minimal at this point and uses default values.
-# You can always add more config options for more control.
-# We've included some commented out config examples here.
-# Just uncomment any of them to get that config option.
-#
-# For full config options, check the docs:
-#    docs.serverless.com
-#
-# Happy Coding!
-
-service: serverless-test
+service: serverless-esi
 
 provider:
   name: aws
@@ -19,38 +6,16 @@ provider:
   stage: dev
   region: eu-west-1
   iamRoleStatements:
-    - Effect: "Allow"
+    -
+      Effect: "Allow"
       Action:
         - 's3:ListBucket'
-        - 's3:PutObject'
+      Resource: arn:aws:s3:::test-esi-bucket
+    -
+      Effect: "Allow"
+      Action:
         - 's3:GetObject'
-      Resource: "*"
-
-custom:
-  wibble: wobble
-
-# you can add statements to the Lambda function's IAM Role here
-#  iamRoleStatements:
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:ListBucket"
-#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:PutObject"
-#      Resource:
-#        Fn::Join:
-#          - ""
-#          - - "arn:aws:s3:::"
-#            - "Ref" : "ServerlessDeploymentBucket"
-
-# you can add packaging information here
-#package:
-#  include:
-#    - include-me.js
-#  exclude:
-#    - exclude-me.js
-#  artifact: my-service-code.zip
+      Resource: arn:aws:s3:::test-esi-bucket/*
 
 functions:
   esi:
@@ -64,10 +29,9 @@ functions:
               Content-Type: "'text/html'"
             template: $input.path('$')
 
-# you can add CloudFormation resource templates here
 resources:
   Resources:
-    TestBucket:
+    TestESIBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: test-dev-buckets-must-be-globally-unique
+        BucketName: test-esi-bucket

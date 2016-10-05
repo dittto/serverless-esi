@@ -6,14 +6,11 @@ module.exports = class {
         this.defaultParams = defaultParams;
     }
 
-    get(path, resolve, reject) {
+    get(path) {
         const params = Object.assign(this.defaultParams, {Key: path});
 
-        this.s3.getObject(
-            params, (err, data) => {
-                if (err) {
-                    return reject(err.stack);
-                }
+        return new Promise((resolve, reject) => {
+            this.s3.getObject(params).promise().then(data => {
                 if (!data) {
                     return reject("Missing template " + path);
                 }
@@ -21,7 +18,10 @@ module.exports = class {
                     path: path,
                     body: data.Body.toString('utf-8')
                 });
-            }
-        );
+            }, error => {
+                console.log(error);
+                return reject(error.stack);
+            });
+        });
     }
 };
