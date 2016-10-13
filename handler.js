@@ -1,27 +1,34 @@
 'use strict';
 
 const AWS = require('aws-sdk');
-const ESIRequest = require('./src/ESIRequest.js');
-const FileHandler = require('./src/FileHandler/S3Handler.js');
-const ESIParser = require('./src/Parser/ESIParser.js');
-const ParsedBody = require('./src/Parser/ParsedBody.js');
+const ESIRequest = require('./src/ESI/ESIRequest');
+const FileHandler = require('./src/FileHandler/S3Handler');
+const ESIParser = require('./src/Parser/ESIParser');
+const ParsedBody = require('./src/Parser/ParsedBody');
+const SharedVars = require('serverless-shared-vars').get();
 
-module.exports.esi = (event, context, cb) => {
+module.exports.esi = (event, context) => {
 
     // get the path
     let path = '';
-    if (event && event.path && event.path.path) {
-        path = event.path.path;
+    if (event && event.pathParameters && event.pathParameters.path) {
+        path = event.pathParameters.path;
     }
     if (!path) {
-        // the [] value is picked up in the API gateway
-        cb(new Error('[404] Not found'));
+        context.succeed({
+            statusCode: 404,
+            headers: {
+                "Cache-Control" : 0,
+                "Content-Type": "text/html"
+            },
+            body: 'Path not found'
+        });
     }
 
     // init aws settings
     const s3 = new AWS.S3();
     const params = {
-        Bucket: 'test-esi-bucket',
+        Bucket: SharedVars.s3Bucket,
         Key: '-'
     };
 
@@ -29,11 +36,25 @@ module.exports.esi = (event, context, cb) => {
     const fileHandler = new FileHandler(s3, params);
     const esiRequest = new ESIRequest(fileHandler, new ESIParser());
     const promise = esiRequest.sendRequest(new ParsedBody('', path));
-    promise.then(html => {
-        cb(null, html);
+    promise.then(esiResponse => {
+        context.succeed({
+            statusCode: 200,
+            headers: {
+                "Cache-Control" : esiResponse.getCacheTime(),
+                "Content-Type": "text/html"
+            },
+            body: esiResponse.getBody()
+        });
     }, reason => {
+        console.log("Handler");
         console.log(reason);
-        cb(null, "404");
+        context.succeed({
+            statusCode: 404,
+            headers: {
+                "Cache-Control" : 0,
+                "Content-Type": "text/html"
+            },
+            body: 'bugger'
+        });
     });
-
 };

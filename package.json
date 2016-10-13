@@ -1,0 +1,29 @@
+{
+  "name": "serverless-esi",
+  "version": "0.0.1",
+  "description": "Combines multiple HTML files stored in S3 and returns according to ESI v1.0",
+  "main": "handler.js",
+  "dependencies": {
+    "serverless-package-includes": "github:dittto/serverless-package-includes",
+    "serverless-shared-vars": "dittto/serverless-shared-vars"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "serverless invoke -f esi"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dittto/serverless-esi.git"
+  },
+  "keywords": [
+    "serverless",
+    "esi",
+    "lambda"
+  ],
+  "author": "Nick Stacey @ditt_to",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dittto/serverless-esi/issues"
+  },
+  "homepage": "https://github.com/dittto/serverless-esi#readme"
+}

@@ -1,8 +1,24 @@
 service: serverless-esi
 
+
+plugins:
+  - serverless-shared-vars
+  - serverless-package-includes
+
+
+custom:
+  packageInclude:
+    - '**/*.js'
+    - '**/*.json'
+
+  shared:
+    s3Bucket: 'test-esi-bucket'
+
+
 provider:
   name: aws
   runtime: nodejs4.3
+  profile: default
   stage: dev
   region: eu-west-1
   iamRoleStatements:
@@ -10,28 +26,28 @@ provider:
       Effect: "Allow"
       Action:
         - 's3:ListBucket'
-      Resource: arn:aws:s3:::test-esi-bucket
+      Resource: arn:aws:s3:::${self:custom.shared.s3Bucket}
     -
       Effect: "Allow"
       Action:
         - 's3:GetObject'
-      Resource: arn:aws:s3:::test-esi-bucket/*
+      Resource: arn:aws:s3:::${self:custom.shared.s3Bucket}/*
+
 
 functions:
   esi:
     handler: handler.esi
+    memorySize: 128
     events:
       - http:
           method: GET
           path: pages/{path+}
-          response:
-            headers:
-              Content-Type: "'text/html'"
-            template: $input.path('$')
+          integration: lambda-proxy
+
 
 resources:
   Resources:
     TestESIBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: test-esi-bucket
+        BucketName: ${self:custom.shared.s3Bucket}

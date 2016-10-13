@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = class {
+class ParsedBody {
     constructor(body, urls) {
         this.setBody(body);
         this.setUrls(urls);
@@ -25,4 +25,6 @@ module.exports = class {
     hasUrls() {
         return this.urls && this.urls.length > 0;
     }
-};
+}
+
+module.exports = ParsedBody;

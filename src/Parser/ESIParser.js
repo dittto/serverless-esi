@@ -2,7 +2,7 @@
 
 const ParsedBody = require('./ParsedBody.js');
 
-module.exports = class {
+class ESIParser {
     getPaths(body) {
         // gets the next set of ESIs
         const includeRegex = /<esi:include[^>]*src="([^"]*)"[^>]*>/gi;
@@ -16,15 +16,15 @@ module.exports = class {
         return new ParsedBody(body, urls);
     }
 
-    replacePathsWithHtml(body, values) {
+    replacePathsWithHtml(body, fileResponses) {
         // handle a missing body
-        if (!body && values[0]) {
-            return values[0].body;
+        if (!body && fileResponses[0]) {
+            return fileResponses[0].getBody();
         }
 
         // replace tags with values
-        for (let value of values) {
-            body = body.replace('<%--' + value.path + '--%>', value.body);
+        for (let fileResponse of fileResponses) {
+            body = body.replace('<%--' + fileResponse.getPath() + '--%>', fileResponse.getBody());
         }
 
         return body;
@@ -33,4 +33,6 @@ module.exports = class {
     parseConditionals(body) {
         return body;
     }
-};
+}
+
+module.exports = ESIParser;
