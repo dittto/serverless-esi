@@ -1,9 +1,9 @@
 service: serverless-esi
 
-
 plugins:
   - serverless-shared-vars
   - serverless-package-includes
+  - serverless-s3-assets
 
 
 custom:
@@ -11,8 +11,17 @@ custom:
     - '**/*.js'
     - '**/*.json'
 
+  s3Assets:
+    test-html:
+      bucket: ${self:custom.shared.s3Bucket}
+      isPublic: false
+      cacheTime: 300
+      contentType: text/html
+      templates:
+        cacheTime: 20
+
   shared:
-    s3Bucket: 'test-esi-bucket'
+    s3Bucket: 'test-esi-bucket-2'
 
 
 provider:
@@ -37,7 +46,7 @@ provider:
 functions:
   esi:
     handler: handler.esi
-    memorySize: 128
+    memorySize: 1024
     events:
       - http:
           method: GET

@@ -12,7 +12,7 @@ class ESIResponse {
     }
 
     getCacheTime() {
-        return this.cacheTime || null;
+        return this.cacheTime || 'max-age=0';
     }
 
     getStatusCode() {
